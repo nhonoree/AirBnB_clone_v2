@@ -1,18 +1,26 @@
+# models/base_model.py
 import uuid
 from datetime import datetime
 
-
 class BaseModel:
-    """Defines all common attributes/methods for other classes"""
-
-    def __init__(self):
-        self.id = str(uuid.uuid4())
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
+    """Base class for all models."""
+    def __init__(self, *args, **kwargs):
+        if kwargs:
+            for key, value in kwargs.items():
+                if key != '__class__':
+                    setattr(self, key, value)
+        else:
+            self.id = str(uuid.uuid4())
+            self.created_at = datetime.now()
+            self.updated_at = self.created_at
 
     def save(self):
-        """Updates updated_at with the current datetime"""
+        """Save object to storage."""
         self.updated_at = datetime.now()
+        # This is just a placeholder to simulate saving to FileStorage
+        storage.new(self)
+        storage.save()
 
     def __str__(self):
-        return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
+        class_name = self.__class__.__name__
+        return f"[{class_name}] ({self.id}) {self.__dict__}"
