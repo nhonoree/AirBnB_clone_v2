@@ -1,50 +1,81 @@
 import unittest
-import MySQLdb
-from io import StringIO
-import sys
-from your_console_module import HBNBCommand  # Adjust this import to your console module
+from models.state import State
+from models import storage
 
-class TestMySQL(unittest.TestCase):
 
-    def setUp(self):
-        """Set up MySQL connection for the tests."""
-        self.db = MySQLdb.connect(
-            user="hbnb_test", 
-            passwd="hbnb_test_pwd", 
-            db="hbnb_test_db", 
-            host="localhost"
-        )
-        self.cursor = self.db.cursor()
+class TestState(unittest.TestCase):
+    """ Test class for State class """
+
+    def test_instance(self):
+        """ Test if an instance of State is created correctly """
+        state = State()
+        self.assertIsInstance(state, State)
+
+    def test_name(self):
+        """ Test the name attribute of State """
+        state = State()
+        self.assertTrue(hasattr(state, "name"))
+        state.name = "California"
+        self.assertEqual(state.name, "California")
+
+    def test_save(self):
+        """ Test if the save method works correctly """
+        state = State()
+        state.name = "California"
+        state.save()
+        state_dict = storage.all()
+        self.assertIn(f"State.{state.id}", state_dict)
+
+    def test_delete(self):
+        """ Test if the delete method works correctly """
+        state = State()
+        state.name = "California"
+        state.save()
+        state_id = state.id
+        state.delete()
+        state_dict = storage.all()
+        self.assertNotIn(f"State.{state_id}", state_dict)
+
+    def test_reload(self):
+        """ Test if the reload method loads the saved object correctly """
+        state = State()
+        state.name = "California"
+        state.save()
+        storage.reload()
+        state_dict = storage.all()
+        self.assertIn(f"State.{state.id}", state_dict)
 
     def test_create_state(self):
-        """Test creating a new state and check if the record is added to the database."""
-        
-        # Get the initial number of records in the states table
-        self.cursor.execute("SELECT COUNT(*) FROM states;")
-        initial_count = self.cursor.fetchone()[0]
+        """ Test creating a new State object and saving it """
+        state = State(name="California")
+        state.save()
+        state_dict = storage.all()
+        self.assertIn(f"State.{state.id}", state_dict)
+        self.assertEqual(state_dict[f"State.{state.id}"].name, "California")
 
-        # Simulate the console command to create a new state
-        console_input = "create State name='California'\n"
-        console_output = StringIO()
-        sys.stdout = console_output
-        HBNBCommand().onecmd(console_input)  # This runs the command from your console
+    def test_invalid_create_state(self):
+        """ Test creating a new State object with invalid data """
+        state = State(name="California")
+        state.save()
+        state_dict = storage.all()
+        self.assertNotEqual(state_dict[f"State.{state.id}"].name, "Texas")
 
-        # Get the number of records after the command
-        self.cursor.execute("SELECT COUNT(*) FROM states;")
-        final_count = self.cursor.fetchone()[0]
+    def test_get_state_count(self):
+        """ Test getting the count of states in the storage """
+        initial_count = len(storage.all())
+        state = State(name="California")
+        state.save()
+        new_count = len(storage.all())
+        self.assertEqual(new_count, initial_count + 1)
 
-        # Check if one record was added
-        self.assertEqual(final_count, initial_count + 1)
-
-    def tearDown(self):
-        """Clean up the test database."""
-        self.cursor.execute("DELETE FROM states WHERE name='California';")
-        self.db.commit()
-
-    @classmethod
-    def tearDownClass(cls):
-        """Close MySQL connection."""
-        cls.db.close()
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_state_instance(self):
+        """ Test creating multiple states and checking their types """
+        state1 = State(name="California")
+        state2 = State(name="Texas")
+        state1.save()
+        state2.save()
+        state_dict = storage.all()
+        self.assertIsInstance(state1, State)
+        self.assertIsInstance(state2, State)
+        self.assertIn(f"State.{state1.id}", state_dict)
+        self.assertIn(f"State.{state2.id}", state_dict)

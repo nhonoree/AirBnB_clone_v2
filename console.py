@@ -4,6 +4,7 @@ Command interpreter for AirBnB clone project
 """
 import cmd
 
+
 class HBNBCommand(cmd.Cmd):
     prompt = "(hbnb) "
 
@@ -14,6 +15,7 @@ class HBNBCommand(cmd.Cmd):
     def do_EOF(self, arg):
         """EOF command to exit the program"""
         return True
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()

@@ -1,7 +1,9 @@
 import json
 
+
 class FileStorage:
     """Serializes instances to a JSON file and deserializes them"""
+
     __file_path = "file.json"
     __objects = {}
 

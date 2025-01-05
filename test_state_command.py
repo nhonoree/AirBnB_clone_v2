@@ -4,11 +4,14 @@ from io import StringIO
 from console import HBNBCommand
 import sys
 
+
 class TestStateCommand(unittest.TestCase):
 
     def setUp(self):
         # Set up a MySQL connection
-        self.conn = MySQLdb.connect(user='hbnb_test', passwd='hbnb_test_pwd', db='hbnb_test_db')
+        self.conn = MySQLdb.connect(
+            user="hbnb_test", passwd="hbnb_test_pwd", db="hbnb_test_db"
+        )
         self.cursor = self.conn.cursor()
         self.initial_count = self._get_states_count()
 
@@ -30,6 +33,7 @@ class TestStateCommand(unittest.TestCase):
         # Check if the state was added
         self.conn.commit()
         self.assertEqual(self._get_states_count(), self.initial_count + 1)
+
 
 if __name__ == "__main__":
     unittest.main()
